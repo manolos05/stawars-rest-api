@@ -84,6 +84,7 @@ def get_planet(planet_id):
         abort(404)
     return jsonify(plant.serialize())
 
+#Post
 
 @app.route('/favorite/planet/<int:planet_id>', methods=['POST'])
 def post_fav_planet(planet_id):
@@ -109,7 +110,13 @@ def post_fav_people(characeteres_id):
 
     return jsonify(favorite.serialize()), 200
 
+#delete
 
+@app.route('/favorite/planet/<int:planet_id>', methods=['DELETE'])
+def delete_planet(planet_id):
+    delplanet = Fav_Planet.query.get(planet_id)
+    
+    db.session.add(delplanet)
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
