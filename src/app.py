@@ -2,13 +2,13 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 import os
-from flask import Flask, request, jsonify, url_for
+from flask import Flask, request, jsonify, url_for, abort
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, People, Planet, Fav_Planet, Fav_People
 #from models import Person
 
 app = Flask(__name__)
@@ -38,12 +38,78 @@ def sitemap():
 
 @app.route('/user', methods=['GET'])
 def handle_hello():
+    users = User.query.all()
+    result = []
+    for user in users: result.append({
+    'id': user.id,
+    'email': user.email
+    })
+    return jsonify(result)
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+@app.route('/people', methods=['GET'])
+def handle_people():
+    peoples = People.query.all()
+    result = []
+    for peopl in peoples: result.append({
+    'characeteres_id': peopl.characeteres_id,
+    'name_people': peopl.name_people,
+    'age': peopl.age,
+    'born_date': peopl.born_date,
+    })
+    return jsonify(result)
 
-    return jsonify(response_body), 200
+@app.route('/people/<string:people_id>', methods=['GET'])
+def get_people(people_id):
+    peopl = People.query.get(people_id)
+    if peopl is None:
+        abort(404)
+    return jsonify(peopl.serialize())
+
+@app.route('/planet', methods=['GET'])
+def handle_planet():
+    planets = Planet.query.all()
+    result = []
+    for plant in planets: result.append({
+    'planet_id': plant.planet_id,
+    'name_planet': plant.name_planet,
+    'population': plant.population,
+    'climate': plant.climate,
+    })
+    return jsonify(result)
+
+@app.route('/planet/<string:planet_id>', methods=['GET'])
+def get_planet(planet_id):
+    plant = Planet.query.get(planet_id)
+    if plant is None:
+        abort(404)
+    return jsonify(plant.serialize())
+
+
+@app.route('/favorite/planet/<int:planet_id>', methods=['POST'])
+def post_fav_planet(planet_id):
+    fav = planet_id
+    favorite = Fav_Planet(
+        user_id = request.json["user_id"],
+        planet_id= fav
+    ) 
+    db.session.add(favorite)
+    db.session.commit()
+    
+    return jsonify(favorite.serialize()), 200
+
+@app.route('/favorite/people/<int:characeteres_id>', methods=['POST'])
+def post_fav_people(characeteres_id):
+    fav = characeteres_id
+    favorite = Fav_People(
+        user_id = request.json["user_id"],
+        characeteres_id= fav
+    ) 
+    db.session.add(favorite)
+    db.session.commit()
+
+    return jsonify(favorite.serialize()), 200
+
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
