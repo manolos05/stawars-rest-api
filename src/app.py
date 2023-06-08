@@ -112,11 +112,27 @@ def post_fav_people(characeteres_id):
 
 #delete
 
-@app.route('/favorite/planet/<int:planet_id>', methods=['DELETE'])
-def delete_planet(planet_id):
-    delplanet = Fav_Planet.query.get(planet_id)
-    
-    db.session.add(delplanet)
+@app.route('/user/favorites/<int:user_id>/planet/<int:planet_id>', methods=['DELETE'])
+def delete_favorite_planet(user_id, planet_id):
+    favorite = Fav_Planet.query.filter_by(user_id=user_id, planet_id=planet_id).first()
+    if favorite is None:
+        return jsonify({'error': 'Favorite planet not found for the user'}), 404
+
+    db.session.delete(favorite)
+    db.session.commit()
+
+    return jsonify({'message': 'Favorite planet deleted successfully'})
+
+@app.route('/user/favorites/<int:user_id>/people/<int:characeteres_id>', methods=['DELETE'])
+def delete_favorite_planet(user_id, characeteres_id):
+    favorite = Fav_People.query.filter_by(user_id=user_id, characeteres_id=characeteres_id).first()
+    if favorite is None:
+        return jsonify({'error': 'Favorite planet not found for the user'}), 404
+
+    db.session.delete(favorite)
+    db.session.commit()
+
+    return jsonify({'message': 'Favorite planet deleted successfully'})
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
