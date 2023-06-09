@@ -46,6 +46,31 @@ def handle_hello():
     })
     return jsonify(result)
 
+@app.route('/people', methods=['GET'])
+def handle_people():
+    peoples = People.query.all()    
+    result = list(map(lambda user:user.serialize(),peoples))
+    return jsonify(result)
+
+
+@app.route('/favorite', methods=['GET'])
+def get_fav():
+    peoples = Fav_People.query.all()    
+    result = list(map(lambda user:user.serialize(),peoples))
+    return jsonify(result)
+
+@app.route('/planet', methods=['GET'])
+def handle_planet():
+    planets = Planet.query.all()
+    result = []
+    for plant in planets: result.append({
+    'planet_id': plant.planet_id,
+    'name_planet': plant.name_planet,
+    'population': plant.population,
+    'climate': plant.climate,
+    })
+    return jsonify(result)
+
 @app.route('/user', methods=['POST'])
 def create_new_user():
     new = User(
@@ -72,9 +97,9 @@ def create_new_people():
 @app.route('/planet', methods=['POST'])
 def create_new_planet():
     new = Planet(
-        name_people = request.json['name_people'],
-        age= request.json['age'],
-        born_date= request.json['born_date'],
+        name_planet = request.json['name_planet'],
+        population= request.json['population'],
+        climate= request.json['climate'],
     )
     db.session.add(new)
     db.session.commit()
@@ -90,32 +115,37 @@ def edit_user(user_id):
 
     return (jsonify(editUser.serialize()))
 
-    
-@app.route('/people', methods=['GET'])
-def handle_people():
-    peoples = People.query.all()    
-    result = list(map(lambda user:user.serialize(),peoples))
-    return jsonify(result)
+@app.route('/people/<string:people_id>', methods=['PUT'])
+def edit_people(people_id):
+    editPeople = People.query.get(people_id)
+    if editPeople is None:
+        abort(404)
+    editPeople.name_people = request.json['name_people']
+    editPeople.age = request.json['age']
+    editPeople.born_date = request.json['born_date']
+    db.session.commit()
 
+    return (jsonify(editPeople.serialize()))
+
+@app.route('/planet/<string:planet_id>', methods=['PUT'])
+def edit_planet(planet_id):
+    editPlanet = Planet.query.get(planet_id)
+    if editPlanet is None:
+        abort(404)
+    editPlanet.name_planet = request.json['name_planet']
+    editPlanet.population = request.json['population']
+    editPlanet.climate = request.json['climate']
+
+    db.session.commit()
+
+    return (jsonify(editPlanet.serialize()))
+    
 @app.route('/people/<string:people_id>', methods=['GET'])
 def get_people(people_id):
     peopl = People.query.get(people_id)
     if peopl is None:
         abort(404)
     return jsonify(peopl.serialize())
-
-@app.route('/planet', methods=['GET'])
-def handle_planet():
-    planets = Planet.query.all()
-    result = []
-    for plant in planets: result.append({
-    'planet_id': plant.planet_id,
-    'name_planet': plant.name_planet,
-    'population': plant.population,
-    'climate': plant.climate,
-    })
-    return jsonify(result)
-
 
 @app.route('/planet/<string:planet_id>', methods=['GET'])
 def get_planet(planet_id):
