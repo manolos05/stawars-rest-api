@@ -46,16 +46,55 @@ def handle_hello():
     })
     return jsonify(result)
 
+@app.route('/user', methods=['POST'])
+def create_new_user():
+    new = User(
+        email= request.json['email'],
+        password = request.json['password'],
+        is_active= request.json['is_active'],
+    )
+    db.session.add(new)
+    db.session.commit()
+    return jsonify(new.serialize()), 200
+
+
+@app.route('/people', methods=['POST'])
+def create_new_people():
+    new = People(
+        name_people = request.json['name_people'],
+        age= request.json['age'],
+        born_date= request.json['born_date'],
+    )
+    db.session.add(new)
+    db.session.commit()
+    return jsonify(new.serialize()), 200
+
+@app.route('/planet', methods=['POST'])
+def create_new_planet():
+    new = Planet(
+        name_people = request.json['name_people'],
+        age= request.json['age'],
+        born_date= request.json['born_date'],
+    )
+    db.session.add(new)
+    db.session.commit()
+    return jsonify(new.serialize()), 200
+
+@app.route('/user/<string:user_id>', methods=['PUT'])
+def edit_user(user_id):
+    editUser = User.query.get(user_id)
+    if editUser is None:
+        abort(404)
+    editUser.email = request.json['email']
+    db.session.commit()
+
+    return (jsonify(editUser.serialize()))
+
+    
 @app.route('/people', methods=['GET'])
 def handle_people():
-    peoples = People.query.all()
-    result = []
-    for peopl in peoples: result.append({
-    'characeteres_id': peopl.characeteres_id,
-    'name_people': peopl.name_people,
-    'age': peopl.age,
-    'born_date': peopl.born_date,
-    })
+    peoples = People.query.all()    
+    result = list(map(lambda user:user.serialize(),peoples))
     return jsonify(result)
 
 @app.route('/people/<string:people_id>', methods=['GET'])
@@ -77,6 +116,7 @@ def handle_planet():
     })
     return jsonify(result)
 
+
 @app.route('/planet/<string:planet_id>', methods=['GET'])
 def get_planet(planet_id):
     plant = Planet.query.get(planet_id)
@@ -97,6 +137,8 @@ def post_fav_planet(planet_id):
     db.session.commit()
     
     return jsonify(favorite.serialize()), 200
+
+
 
 @app.route('/favorite/people/<int:characeteres_id>', methods=['POST'])
 def post_fav_people(characeteres_id):
@@ -124,7 +166,7 @@ def delete_favorite_planet(user_id, planet_id):
     return jsonify({'message': 'Favorite planet deleted successfully'})
 
 @app.route('/user/favorites/<int:user_id>/people/<int:characeteres_id>', methods=['DELETE'])
-def delete_favorite_planet(user_id, characeteres_id):
+def delete_favorite_people(user_id, characeteres_id):
     favorite = Fav_People.query.filter_by(user_id=user_id, characeteres_id=characeteres_id).first()
     if favorite is None:
         return jsonify({'error': 'Favorite planet not found for the user'}), 404
