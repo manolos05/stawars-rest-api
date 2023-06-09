@@ -206,6 +206,28 @@ def delete_favorite_people(user_id, characeteres_id):
 
     return jsonify({'message': 'Favorite planet deleted successfully'})
 
+
+@app.route('/user/<string:user_id>', methods = ['DELETE'])
+def delete_user(user_id):
+    delUSer = User.query.get(user_id)
+    db.session.delete(delUSer)
+    db.session.commit()
+    return jsonify({'result': 'success'})
+
+@app.route('/planet/<string:planet_id>', methods = ['DELETE'])
+def delete_planet(planet_id):
+    delPlanet = Planet.query.get(planet_id)
+    db.session.delete(delPlanet)
+    db.session.commit()
+    return jsonify({'result': 'success'})
+
+@app.route('/people/<string:people_id>', methods = ['DELETE'])
+def delete_people(people_id):
+    delPleople = People.query.get(people_id)
+    db.session.delete(delPleople)
+    db.session.commit()
+    return jsonify({'result': 'success'})
+
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
